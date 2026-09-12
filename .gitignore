@@ -1,0 +1,10 @@
+.env
+*.tfstate.*
+.terraform/
+__pycache__/
+*.pyc
+.venv/
+*.parquet
+data/
+.pytest_cache/
+.ruff_cache/
