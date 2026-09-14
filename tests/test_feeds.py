@@ -1,4 +1,4 @@
-# The purpose of the file is to write the test that hold the registry to its requirments, then running pytest.
+# The purpose of the file is to write the test that holds the registry to its requirements, then running pytest.
 
 import pytest
 
