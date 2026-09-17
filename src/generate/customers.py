@@ -1,6 +1,6 @@
-"""Synthetic customer master data filr for AR-360 Project
+"""Synthetic customer master data file for AR-360 Project
 
-Payment bhaviour is a property of the customer, not the invocie.
+Payment behaviour is a property of the customer, not the invoice.
 """
 
 # The purpose of the NamedTuple is to incorporate a tuple whose positions have names.
@@ -18,15 +18,16 @@ class Behaviour(NamedTuple):
     mean_days_late: float
     sd_days_late: float
     p_partial: float
+    earliest_days: int
 
 
 SEGMENTS: dict[str, Behaviour] = {
     "key_account": Behaviour(
-        -2.0, 4.0, 0.10
-    ),  # -2.0 is deliberate due to the fact in real life the key accounts pay earlier in order to ensure a settlement discounts.
-    "wholesale": Behaviour(6.0, 9.0, 0.22),
-    "horeca": Behaviour(14.0, 16.0, 0.35),
-    "convenience": Behaviour(9.0, 12.0, 0.28),
+        -2.0, 4.0, 0.10, -5
+    ),  # key accounts pay early to take settlement discounts
+    "wholesale": Behaviour(6.0, 9.0, 0.22, 0),
+    "horeca": Behaviour(14.0, 16.0, 0.35, 0),
+    "convenience": Behaviour(9.0, 12.0, 0.28, 0),
 }
 
 SEGMENT_MIX = (0.08, 0.34, 0.33, 0.25)  # just a mix between the segments defined earlier
@@ -58,7 +59,7 @@ def customers(ctx: RunContext, n: int = N_CUSTOMERS) -> pd.DataFrame:
             "segment": rng.choice(list(SEGMENTS), n, p=SEGMENT_MIX),
             "credit_grade": rng.choice(
                 list("ABCD"), n, p=GRADE_MIX
-            ),  # limitations on the realistic synthetic data, a D-grade customer or customer who is assed to be risky, wont get a 60 days terms, but as for the example of the project, this is a hopetical market.
+            ),  # limitations on the realistic synthetic data, a D-grade customer or customer who is assessed to be risky, wont get a 60 days terms, but as for the example of the project, this is a hopetical market.
             "terms_days": pd.array(rng.choice(TERMS_DAYS, n, p=TERMS_MIX), dtype="Int64"),
             "channel": rng.choice(CHANNELS, n),
         }
