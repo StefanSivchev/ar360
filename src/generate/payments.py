@@ -6,6 +6,8 @@ One row per payment * invoice. A payment that settles an invoice in theree parts
 import numpy as np
 import pandas as pd
 
+from src.common.context import RunContext
+
 LATEST_DAYS = 180  # safety rail not a business rule
 BAD_DEBT_RATE = 0.005  # average share never paid, before credit note exclusion
 GRADE_RISK = {"A": 0.2, "B": 0.5, "C": 1.0, "D": 3.0}
@@ -105,3 +107,32 @@ def allocate_amounts(rows: pd.DataFrame, rng: np.random.Generator) -> pd.Series:
     before_last = part.where(~is_last, 0).groupby(rows.invoice_id).transform("sum")
     part = part.where(~is_last, cents - before_last)
     return (part / 100).rename("applied_amount")
+
+
+def cash_application(
+    ctx: RunContext, invoices: pd.DataFrame, customers: pd.DataFrame
+) -> pd.DataFrame:
+    """Cash application feed at payment * invoice
+
+    Owns the rng and the cut off. The call order below is load bearing: every function draws from the same generator, so reordering changes every number in the output.
+    """
+
+    rng = np.random.default_rng(ctx.seed + 2)
+    cutoff = pd.Timestamp(ctx.logical_date) - pd.Timedelta(days=1)
+
+    late = days_late(invoices, customers, rng)
+    never = never_paid(invoices, customers, rng)
+    pay_date = pay_dates(invoices, late, never=never, cutoff=cutoff)
+    rows = split_payments(invoices, customers, pay_date, rng)
+    rows["applied_amount"] = allocate_amounts(rows, rng)
+    group = rows.groupby(["customer_id", "payment_date"], sort=True).ngroup()
+    rows["payment_id"] = "P" + group.astype("string").str.zfill(9)
+
+    feed_columns = [
+        "payment_id",
+        "invoice_id",
+        "customer_id",
+        "payment_date",
+        "applied_amount",
+    ]
+    return rows[feed_columns].reset_index(drop=True)
