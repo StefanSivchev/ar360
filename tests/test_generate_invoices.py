@@ -21,7 +21,7 @@ def inv():
     return build(CTX)
 
 
-def test_volume_within_5pct_of_plna(inv):
+def test_volume_within_5pct_of_plan(inv):
     assert abs(len(inv) - 600_000) / 600_000 < 0.05
 
 

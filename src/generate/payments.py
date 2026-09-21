@@ -1,6 +1,6 @@
-"""Synthethic cash application for AR-360 Project.
+"""Synthetic cash application for AR-360 Project.
 
-One row per payment * invoice. A payment that settles an invoice in theree parts is three rows, not one.
+One row per payment * invoice. A payment that settles an invoice in three parts is three rows, not one.
 """
 
 import numpy as np
@@ -34,7 +34,7 @@ def days_late(
 def never_paid(
     invoices: pd.DataFrame, customers: pd.DataFrame, rng: np.random.Generator
 ) -> pd.Series:
-    """Flag invoices never paid. risk weighte, credit notes excluded"""
+    """Flag invoices never paid. Risk-weighted,, credit notes excluded"""
     risk = invoices[["customer_id"]].merge(
         customers[["customer_id", "credit_grade", "segment"]],
         on="customer_id",
@@ -69,7 +69,7 @@ def split_payments(
     pay_date: pd.Series,
     rng: np.random.Generator,
 ) -> pd.DataFrame:
-    "One row per payment * invocies, partial payers split into 2-3 parts."
+    "One row per payment * invoices,, partial payers split into 2-3 parts."
     is_paid = pay_date.notna()
     cols = ["invoice_id", "customer_id", "invoice_date", "gross_amount"]
     paid = invoices.loc[is_paid, cols].assign(final_date=pay_date[is_paid])
@@ -98,7 +98,7 @@ def split_payments(
 
 
 def allocate_amounts(rows: pd.DataFrame, rng: np.random.Generator) -> pd.Series:
-    """Split each invoice's gross accross its parts, exact to the cent"""
+    """Split each invoice's gross across its parts, exact to the cent"""
     cents = (rows.gross_amount * 100).round().astype("int64")
     weight = pd.Series(rng.uniform(0.5, 1.5, len(rows)), index=rows.index)
     share = weight / weight.groupby(rows.invoice_id).transform("sum")

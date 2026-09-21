@@ -1,7 +1,7 @@
-# Purpose of the file is to define a three things that every run needs to know
+# Purpose of the file is to define three things that every run needs to know
 # A unique ID, the logical date, and the random seed
 
-# This is done to ensure that when backfilling not to produce todays anaswers.
+# This is done to ensure that when backfilling not to produce today's answers..
 
 # The purpose of uuid is to generate a unique identifier for each run.
 # This ensures that each run can be distinguished from others,
@@ -15,9 +15,9 @@ from src.common.logging import bind_run
 
 
 def new_run_id(logical_date: date) -> str:
-    """Sortable, unique run ID for a given logical date."""
-    stamp = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
-    return f"{stamp}_{uuid.uuid4().hex[:4]}"
+    """Run ID: the date the run is FOR, then when it ran, then a random suffix."""
+    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+    return f"{logical_date.isoformat()}_{stamp}_{uuid.uuid4().hex[:4]}"
 
 
 @dataclass(frozen=True)
