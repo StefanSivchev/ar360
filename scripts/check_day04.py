@@ -1,4 +1,4 @@
-"""Day 4 part 2 - cash application againts the frozen baseline"""
+"""Day 4 - payments, disputes and dunning against the frozen baseline"""
 
 import numpy as np
 
@@ -6,6 +6,7 @@ from src.common.context import build_context
 from src.generate.calendar import date_spine
 from src.generate.customers import customers
 from src.generate.disputes import dispute_flags, disputes, settlement_lateness
+from src.generate.dunning import dunning
 from src.generate.invoices import invoices
 from src.generate.payments import cash_application
 
@@ -34,6 +35,14 @@ BASELINE = {
     "disp_min_amt": 4.59,
     "raised_after_invoice": True,
     "resolved_after_raised": True,
+    "part_paid": 0,
+    "contacts": 896714,
+    "dunned_invoices": 370275,
+    "first_is_reminder": True,
+    "promises": 178491,
+    "promises_kept": 109632,
+    "promise_lead_days": 1746566,
+    "promise_after_contact": True,
 }
 
 parts_per_invoice = rows.groupby("invoice_id").size()
@@ -45,7 +54,12 @@ d_rng = np.random.default_rng(ctx.seed + 3)
 lateness = settlement_lateness(inv, rows)
 disputed = dispute_flags(inv, lateness, d_rng)
 d = disputes(ctx, inv, rows)
-
+dl = dunning(ctx, inv, rows, cust)
+pr = dl[dl.promised_date.notna()]
+settled = rows.groupby("invoice_id").payment_date.max()
+applied = rows.groupby("invoice_id").applied_amount.sum()
+gross = inv.set_index("invoice_id").gross_amount.loc[applied.index]
+first_level = dl.sort_values("contact_date").groupby("invoice_id").contact_level.first()
 
 actual = {
     "rows": len(rows),
@@ -71,6 +85,14 @@ actual = {
     "resolved_after_raised": bool(
         (d.resolved_date.dropna() > d.raised_date[d.resolved_date.notna()]).all()
     ),
+    "part_paid": int(((applied - gross).abs() > 0.005).sum()),
+    "contacts": len(dl),
+    "dunned_invoices": dl.invoice_id.nunique(),
+    "first_is_reminder": bool((first_level == "REMINDER").all()),
+    "promises": len(pr),
+    "promises_kept": int((pr.invoice_id.map(settled) <= pr.promised_date).sum()),
+    "promise_lead_days": int((pr.promised_date - pr.contact_date).dt.days.sum()),
+    "promise_after_contact": bool((pr.promised_date >= pr.contact_date).all()),
 }
 
 for name, expected in BASELINE.items():
