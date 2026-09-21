@@ -70,7 +70,7 @@ def disputes(ctx, invoices: pd.DataFrame, cash: pd.DataFrame) -> pd.DataFrame:
     frac = rng.uniform(0.2, 1.0, n)  # draw 3
     frac = np.where(reason == "ADMIN", 1.0, frac)
 
-    cutoff = ctx.logical_date - pd.Timedelta(days=1)
+    cutoff = pd.Timestamp(ctx.cutoff)
 
     inv_date = disputed.invoice_date.to_numpy()
     lag = rng.integers(1, 46, n)  # draw 4

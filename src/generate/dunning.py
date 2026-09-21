@@ -98,7 +98,7 @@ def dunning(
     """The dunning_log feed: one row per contact, only what the source system records."""
 
     rng = np.random.default_rng(ctx.seed + 4)
-    cutoff = pd.Timestamp(ctx.logical_date) - pd.Timedelta(days=1)
+    cutoff = pd.Timestamp(ctx.cutoff)
 
     c = contacts(dunnable(invoices, cash, customers, cutoff))
     c["promised_date"] = promises(c, rng)  # draw BEFORE any re-sort

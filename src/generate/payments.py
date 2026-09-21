@@ -118,7 +118,7 @@ def cash_application(
     """
 
     rng = np.random.default_rng(ctx.seed + 2)
-    cutoff = pd.Timestamp(ctx.logical_date) - pd.Timedelta(days=1)
+    cutoff = pd.Timestamp(ctx.cutoff)
 
     late = days_late(invoices, customers, rng)
     never = never_paid(invoices, customers, rng)

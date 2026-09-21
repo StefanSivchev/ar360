@@ -9,7 +9,7 @@
 
 import uuid
 from dataclasses import dataclass, field
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 
 from src.common.logging import bind_run
 
@@ -30,6 +30,11 @@ class RunContext:
     seed: int = 42
     dag_run_id: str | None = None
     started_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+
+    @property
+    def cutoff(self) -> date:
+        """Last complete day of data as at the logical date: the day before it."""
+        return self.logical_date - timedelta(days=1)
 
 
 def build_context(
