@@ -41,8 +41,8 @@ def test_credit_notes_about_four_percent(inv):
 def test_due_dates_follow_terms(inv):
     credit = inv.gross_amount < 0
     lag = (inv.due_date - inv.invoice_date).dt.days
-    assert (lag[~credit] == inv.terms_days[~credit]).all
-    assert (lag[credit] == 0).all
+    assert (lag[~credit] == inv.terms_days[~credit]).all()
+    assert (lag[credit] == 0).all()
 
 
 def test_summer_outsells_winter(inv):
