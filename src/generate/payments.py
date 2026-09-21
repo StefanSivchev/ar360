@@ -128,11 +128,8 @@ def cash_application(
     group = rows.groupby(["customer_id", "payment_date"], sort=True).ngroup()
     rows["payment_id"] = "P" + group.astype("string").str.zfill(9)
 
-    feed_columns = [
-        "payment_id",
-        "invoice_id",
-        "customer_id",
-        "payment_date",
-        "applied_amount",
-    ]
-    return rows[feed_columns].reset_index(drop=True)
+    # two parts of one invoice on the same day are one payment line: enforce the grain
+    grain = ["payment_id", "invoice_id", "customer_id", "payment_date"]
+    feed = rows.groupby(grain, as_index=False, sort=False).applied_amount.sum()
+    feed["applied_amount"] = feed.applied_amount.round(2)
+    return feed

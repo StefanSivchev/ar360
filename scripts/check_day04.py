@@ -18,12 +18,12 @@ rows = cash_application(ctx, inv, cust)
 
 
 BASELINE = {
-    "rows": 802173,
+    "rows": 799119,
     "invoices": 580100,
     "applied_total": 587378323.99,
-    "parts_1": 432026,
-    "parts_2": 74075,
-    "parts_3": 73999,
+    "parts_1": 433952,
+    "parts_2": 73277,
+    "parts_3": 72871,
     "payments": 740942,
     "multi_invoice": 55145,
     "rows_in_multi": 113322,
