@@ -63,3 +63,14 @@ def test_credit_notes_settle_once_on_due_date(data):
 def test_same_seed_same_data(data):
     _, cash = data
     pd.testing.assert_frame_equal(cash, build(CTX)[1])
+
+
+def test_days_late_ordered_by_segment(data):
+    inv, cash = data
+    seg = customers(CTX).set_index("customer_id").segment
+    pos = inv[inv.gross_amount > 0].set_index("invoice_id")
+    pos = pos.assign(settled=cash.groupby("invoice_id").payment_date.max())
+    pos = pos.dropna(subset=["settled"])
+    late = (pos.settled - pos.due_date).dt.days
+    m = late.groupby(pos.customer_id.map(seg)).median()
+    assert m["key_account"] < m["wholesale"] < m["convenience"] < m["horeca"]

@@ -101,3 +101,13 @@ for name, expected in BASELINE.items():
         print(f"{name: <15} match {got:>15,}")
     else:
         print(f"{name:<15} MISMATCH expected {expected:>15,} got {got:>15,}")
+
+# def test_days_late_ordered_by_segment(data):
+#     inv, cash = data
+#     seg = customers(CTX).set_index("customer_id").segment
+#     pos = inv[inv.gross_amount > 0].set_index("invoice_id")
+#     pos = pos.assign(settled=cash.groupby("invoice_id").payment_date.max())
+#     pos = pos.dropna(subset=["settled"])
+#     late = (pos.settled - pos.due_date).dt.days
+#     m = late.groupby(pos.customer_id.map(seg)).median()
+#     assert m["key_account"] < m["wholesale"] < m["convenience"] < m["horeca"]
