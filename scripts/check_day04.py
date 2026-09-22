@@ -80,9 +80,9 @@ actual = {
     "largest_remittance": int(per_payment.max()),
     "disputed_share_of_open": round(float(disputed[lateness.isna()].mean()), 4),
     "disputes": len(d),
-    "disp_total": round(d.disp_amt.sum(), 2),
+    "disp_total": round(d.disputed_amount.sum(), 2),
     "disp_open_share": round(float(d.resolved_date.isna().mean()), 4),
-    "disp_min_amt": round(float(d.disp_amt.min()), 2),
+    "disp_min_amt": round(float(d.disputed_amount.min()), 2),
     "raised_after_invoice": bool(
         (
             d.raised_date >= inv.set_index("invoice_id").loc[d.invoice_id].invoice_date.to_numpy()

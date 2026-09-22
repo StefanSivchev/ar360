@@ -80,7 +80,7 @@ def disputes(ctx, invoices: pd.DataFrame, cash: pd.DataFrame) -> pd.DataFrame:
     mu, sd = zip(*[RESOLUTION_DAYS[r] for r in reason])
     dur = np.clip(rng.normal(mu, sd), 1, None).round()  # draw 5
     resolved = raised + dur.astype("timedelta64[D]")
-    resolved = np.where(resolved <= np.datetime64(cutoff, "D"), resolved, np.datetime64("NaT"))
+    resolved = np.where(resolved <= np.datetime64(cutoff, "D"), resolved, np.datetime64("NaT", "D"))
 
     return pd.DataFrame(
         {
@@ -88,7 +88,7 @@ def disputes(ctx, invoices: pd.DataFrame, cash: pd.DataFrame) -> pd.DataFrame:
             "invoice_id": disputed.index,
             "customer_id": disputed.customer_id.to_numpy(),
             "reason_code": reason,
-            "disp_amt": (disputed.gross_amount.to_numpy() * frac).round(2),
+            "disputed_amount": (disputed.gross_amount.to_numpy() * frac).round(2),
             "raised_date": raised,
             "resolved_date": resolved,
         }
