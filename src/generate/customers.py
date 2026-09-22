@@ -44,9 +44,10 @@ GRADE_MIX = (0.20, 0.40, 0.30, 0.10)
 
 def customers(ctx: RunContext, n: int = N_CUSTOMERS) -> pd.DataFrame:
     """Generate the customer master data file. The same seed produces the same DataFrame"""
+
     rng = np.random.default_rng(
         ctx.seed
-    )  # the idea here is to ensure that if another random seed is generated it wont brake the reproductivity of the code.
+    )  # the idea here is to ensure that if another random seed is generated it wont break the reproducibility of the code, each generator owns one seed offset
 
     df = pd.DataFrame(
         {
