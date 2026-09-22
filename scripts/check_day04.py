@@ -1,6 +1,7 @@
 """Day 4 - payments, disputes and dunning against the frozen baseline"""
 
 import numpy as np
+import pandas as pd
 
 from src.common.context import build_context
 from src.generate.calendar import date_spine
@@ -43,6 +44,11 @@ BASELINE = {
     "promises_kept": 109632,
     "promise_lead_days": 1746566,
     "promise_after_contact": True,
+    "open_invoices": 19976,
+    "open_share": 0.0333,
+    "open_total": 22199975.82,
+    "over90_share": 0.1296,
+    "dso_classic": 53.6,
 }
 
 parts_per_invoice = rows.groupby("invoice_id").size()
@@ -94,6 +100,30 @@ actual = {
     "promise_lead_days": int((pr.promised_date - pr.contact_date).dt.days.sum()),
     "promise_after_contact": bool((pr.promised_date >= pr.contact_date).all()),
 }
+
+# --- open book at cutoff: evidence for Deviation #10 ---
+cutoff = pd.Timestamp(ctx.cutoff)
+applied = rows.groupby("invoice_id")["applied_amount"].sum()
+book = inv.set_index("invoice_id")
+open_amt = (book["gross_amount"] - applied.reindex(book.index, fill_value=0)).round(2)
+is_open = open_amt != 0
+
+overdue_days = (cutoff - book["due_date"]).dt.days
+last_90 = book["invoice_date"] > cutoff - pd.DateOffset(days=90)
+open_total = open_amt[is_open].sum()
+over90_total = open_amt[is_open & (overdue_days > 90)].sum()
+sales_90 = book.loc[last_90, "gross_amount"].sum()
+
+actual.update(
+    {
+        "open_invoices": int(is_open.sum()),
+        "open_share": round(float(is_open.mean()), 4),
+        "open_total": round(float(open_total), 2),
+        "over90_share": round(float(over90_total / open_total), 4),
+        "dso_classic": round(float(open_total / sales_90 * 90), 1),
+    }
+)
+
 
 for name, expected in BASELINE.items():
     got = actual[name]
