@@ -39,3 +39,7 @@ target-version = "py313"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.sqlfluff.core]
+dialect = "snowflake"
+max_line_length = 100

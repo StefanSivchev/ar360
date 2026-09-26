@@ -14,6 +14,6 @@ jobs:
 
       - run: uv sync --locked --extra dev
 
-      - run: uv run ruff check .
+      - run: uv run pre-commit run --all-files --show-diff-on-failure
 
       - run: uv run pytest -q
