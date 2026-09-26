@@ -23,12 +23,17 @@ class Feed:
     load_pattern: LoadPattern
     business_key: tuple[
         str, ...
-    ]  # Tuplet is used rather than a list to ensure immutability and hashability, which is important for using it as a key in dictionaries or sets.
+    ]  # Tuple is used rather than a list to ensure immutability and hashability, which is important for using it as a key in dictionaries or sets.
     control_column: str | None = None
+    window_column: str | None = None
     description: str = ""
 
+    def __post_init__(self) -> None:
+        if self.load_pattern in ("delta", "append") and self.window_column is None:
+            raise ValueError(f"{self.name}: {self.load_pattern} feed needs a window_column")
 
-# The registery is below. Acting as a Source Registry. Each feed is defined with its name, load pattern, business key, control column, and description.
+
+# The Registry is below. Acting as a Source Registry. Each feed is defined with its name, load pattern, business key, control column, and description.
 FEEDS: tuple[Feed, ...] = (
     Feed(
         name="sap_ar_open_items",
@@ -36,6 +41,7 @@ FEEDS: tuple[Feed, ...] = (
         business_key=("invoice_id",),
         control_column="gross_amount",
         description="Open AR items from SAP. One row per invoice.",
+        window_column="invoice_date",
     ),
     Feed(
         name="cash_application",
@@ -43,34 +49,39 @@ FEEDS: tuple[Feed, ...] = (
         business_key=("payment_id", "invoice_id"),
         control_column="applied_amount",
         description="Payment to invoice matches. Support partial settlement.",
+        window_column="entry_date",
     ),
     Feed(
         name="customer_master",
         load_pattern="snapshot",
         business_key=("customer_id",),
-        control_column=None,
         description="Full customer master data and state each run. Input to SCD2",
+        control_column=None,
+        window_column=None,
     ),
     Feed(
         name="credit_disputes",
         load_pattern="snapshot",
         business_key=("dispute_id",),
-        control_column="disputed_amount",
         description="Open disputes and credit limits",
+        control_column="disputed_amount",
+        window_column="raised_date",
     ),
     Feed(
         name="dunning_log",
         load_pattern="append",
         business_key=("contact_id",),
-        control_column=None,
         description="Dunning contacts and promises to pay",
+        control_column=None,
+        window_column="contact_date",
     ),
     Feed(
         name="fx_rates",
         load_pattern="append",
         business_key=("currency", "rate_date"),
-        control_column=None,
         description="ECB daily rates",
+        control_column=None,
+        window_column="rate_date",
     ),
 )
 

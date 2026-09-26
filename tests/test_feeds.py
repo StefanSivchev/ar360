@@ -3,7 +3,7 @@
 import pytest
 
 # The file import
-from src.common.feeds import FEEDS, feeds_by_pattern, get_feed
+from src.common.feeds import FEEDS, Feed, feeds_by_pattern, get_feed
 
 
 # The first  two tests.
@@ -47,3 +47,8 @@ def test_get_feed_raises_helpfully_on_unknown_name():
     with pytest.raises(KeyError) as exc:
         get_feed("nope")
     assert "fx_rates" in str(exc.value)
+
+
+def test_delta_feed_without_window_column_is_rejected():
+    with pytest.raises(ValueError, match="window_column"):
+        Feed(name="x", load_pattern="delta", business_key=("id",))
