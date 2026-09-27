@@ -32,6 +32,8 @@ class settings(BaseSettings):
 
     # Pydantic takes the string data and hands a real Path object
     data_dir: Path = Path("data")
+    # Generator output that extraction treats as the source system.
+    source_dir: Path = Path("data/run1")
 
 
 # Settings are constructed once on a frist call and every later call returns the same object.

@@ -15,7 +15,7 @@ uv sync --extra dev
 ```
 
 
-**Status:** Phase 1 of 6 completed - Synthetic source data (v0.1.0)
+**Status:** week 2 of 6 — day 7: extractors and exact control totals
 
 ## Data
 
