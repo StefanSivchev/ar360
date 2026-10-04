@@ -21,6 +21,7 @@ dev = [
     "ruff",
     "sqlfluff",
     "pre-commit",
+    "moto[s3]>=5",
 ]
 
 [project.scripts]
