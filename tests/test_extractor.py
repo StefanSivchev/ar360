@@ -2,8 +2,9 @@ from datetime import date
 from decimal import Decimal
 
 import pandas as pd
+import pytest
 
-from src.common.feeds import get_feed
+from src.common.feeds import Feed, get_feed
 from src.extract.base import CreditDisputesExtractor, Extractor, get_extractor, window
 
 W = window(date(2026, 9, 11))  # [2026-09-04, 2026-09-12)
@@ -61,3 +62,25 @@ def test_get_extractor_uses_the_default_unless_special(tmp_path):
     cash = get_extractor(get_feed("cash_application"), tmp_path)
     assert type(disputes) is CreditDisputesExtractor
     assert type(cash) is Extractor
+
+
+def test_read_raises_on_no_window_date(tmp_path):
+    feed = Feed("t", "append", ("id",), window_column="d")
+    df = pd.DataFrame({"id": ["a", "b"], "d": [pd.Timestamp("2026-01-05"), pd.NaT]})
+    df.to_parquet(tmp_path / "t.parquet", index=False)
+    with pytest.raises(ValueError, match="d is missing on 1 row"):
+        Extractor(feed, tmp_path).read(window(date(2026, 1, 5)))
+
+
+def test_disputes_read_raises_on_no_window_date(tmp_path):
+    feed = Feed("credit_disputes", "snapshot", ("dispute_id",), window_column="raised_date")
+    df = pd.DataFrame(
+        {
+            "dispute_id": ["D1", "D2"],
+            "raised_date": [pd.Timestamp("2026-01-02"), pd.NaT],
+            "resolved_date": [pd.NaT, pd.NaT],
+        }
+    )
+    df.to_parquet(tmp_path / "credit_disputes.parquet", index=False)
+    with pytest.raises(ValueError, match="raised_date is missing on 1 row"):
+        get_extractor(feed, tmp_path).read(window(date(2026, 1, 5)))

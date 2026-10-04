@@ -41,8 +41,19 @@ class Extractor:
     source_dir: Path
 
     def read(self, w: DateWindow) -> pd.DataFrame:
-        """Delta and append feeds return the window; snapshots return all rows."""
+        """Delta and append feeds return the window; snapshots return all rows.
+
+        Raises ValueError if any row has no window date: it would never be extracted.
+        """
         df = pd.read_parquet(self.source_dir / f"{self.feed.name}.parquet")
+        col = self.feed.window_column
+        if col is not None:
+            missing = int(df[col].isna().sum())
+            if missing:
+                raise ValueError(
+                    f"{self.feed.name}: {col} is missing on {missing} row(s); "
+                    "no window would ever read them"
+                )
         if self.feed.load_pattern == "snapshot":
             return df
         return df[w.contains(df[self.feed.window_column])]
