@@ -15,7 +15,7 @@ uv sync --extra dev
 ```
 
 
-**Status:** week 2 of 6 — day 7: extractors and exact control totals
+**Status:** week 2 of 6 — day 8: idempotent partitioned parquet writer
 
 ## Data
 
