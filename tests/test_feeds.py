@@ -1,4 +1,4 @@
-# The purpose of the file is to write the test that holds the registry to its requirements, then running pytest.
+"""Tests that hold the feed registry to its contract."""
 
 import pytest
 

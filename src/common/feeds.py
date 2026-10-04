@@ -14,16 +14,16 @@ from typing import Literal
 LoadPattern = Literal["delta", "snapshot", "append"]
 
 
-# The FEED dataclass.
 @dataclass(frozen=True)
 class Feed:
-    """One source feed and its communication/interaction with the rest of the pipeline."""
+    """One source feed and the contract the rest of the pipeline reads from it."""
 
     name: str
     load_pattern: LoadPattern
-    business_key: tuple[
-        str, ...
-    ]  # Tuple is used rather than a list to ensure immutability and hashability, which is important for using it as a key in dictionaries or sets.
+
+    # A tuple, not a list: frozen=True blocks reassignment but not in-place mutation,
+    # and a list field would make Feed unhashable.
+    business_key: tuple[str, ...]
     control_column: str | None = None
     window_column: str | None = None
     description: str = ""

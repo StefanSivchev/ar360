@@ -3,9 +3,6 @@
 
 # This is done to ensure that when backfilling not to produce today's answers..
 
-# The purpose of uuid is to generate a unique identifier for each run.
-# This ensures that each run can be distinguished from others,
-# even if they occur on the same logical date.
 
 import uuid
 from dataclasses import dataclass, field

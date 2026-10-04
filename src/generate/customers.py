@@ -3,7 +3,6 @@
 Payment behaviour is a property of the customer, not the invoice.
 """
 
-# The purpose of the NamedTuple is to incorporate a tuple whose positions have names.
 from typing import NamedTuple
 
 import numpy as np

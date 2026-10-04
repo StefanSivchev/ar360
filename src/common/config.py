@@ -1,18 +1,15 @@
-# The purpose of lru_cache is to cache the settings object so that it is only created once.
-# This is important because creating the settings object can be expensive,
-# and we want to avoid doing it multiple times.
-# By using lru_cache, we ensure that the settings object is only created once and reused on subsequent calls to get_settings().
 from functools import lru_cache
-
-# The purpose of Path is to provide a convenient way to work with file system paths.
 from pathlib import Path
 
-# The purpose of pydantic_settings is to provide a way to define and validate settings for an application.
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class settings(BaseSettings):
-    """Typed configuration for AR-360, read from environment or .env."""
+class Settings(BaseSettings):
+    """Typed configuration for AR-360.
+
+    Validated when first loaded. Environment variables take precedence over .env,
+    so the same code runs unchanged on a laptop, in CI and in Airflow.
+    """
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -30,18 +27,13 @@ class settings(BaseSettings):
     snowflake_user: str | None = None
     snowflake_role: str = "AR360_LOADER"
 
-    # Pydantic takes the string data and hands a real Path object
+    # Root folder the generator writes into.
     data_dir: Path = Path("data")
     # Generator output that extraction treats as the source system.
     source_dir: Path = Path("data/run1")
 
 
-# Settings are constructed once on a frist call and every later call returns the same object.
-# Therefore there is no re-reading on every import.
+# Cached so the whole process shares one Settings object and .env is read once.
 @lru_cache
-def get_settings() -> settings:
-    return settings()
-
-
-# Configuration is declared once as a typed model that validates on startup and resolves from the environment before the file,
-# so the same code runs unchanged on any laptop, in CI and in Airflow.
+def get_settings() -> Settings:
+    return Settings()
